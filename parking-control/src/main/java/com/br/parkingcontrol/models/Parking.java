@@ -27,13 +27,13 @@ public class Parking implements Serializable {
     @Column(nullable = false, unique = true, length = 70)
     private String modelCar;
     @Column(nullable = false, unique = true, length = 70)
-    private String collorCar;
+    private String colorCar;
     @Column(nullable = false)
     private LocalDateTime registrationDate;
     @Column(nullable = false, length = 130)
     private String responsibleName;
     @Column(nullable = false, length = 20)
-    private String apartamnet;
+    private String apartment;
     @Column(nullable = false, length = 20)
     private String block;
 
