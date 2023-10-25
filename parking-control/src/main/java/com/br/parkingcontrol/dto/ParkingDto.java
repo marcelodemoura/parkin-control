@@ -17,11 +17,11 @@ public class ParkingDto {
     @NotBlank
     private String modelCar;
     @NotBlank
-    private String collorCar;
+    private String colorCar;
     @NotBlank
     private String responsibleName;
     @NotBlank
-    private String apartamnet;
+    private String apartment;
     @NotBlank
     private String block;
 
