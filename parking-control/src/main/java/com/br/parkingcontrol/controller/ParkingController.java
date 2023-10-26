@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -25,14 +28,59 @@ public class ParkingController {
     }
 
     @PostMapping
-    public ResponseEntity<Object>saveParking(@RequestBody @Valid ParkingDto parkingDto){
+    public ResponseEntity<Object> saveParking(@RequestBody @Valid ParkingDto parkingDto) {
+        if (parkingService.existsByLicensePlateCar(parkingDto.getLicensePlateCar())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Conflict: license Plate car exists");
+        }
+        if (parkingService.existsByParkingNumber(parkingDto.getParkingNumber())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("conflict parking is already in use!");
+        }
+        if (parkingService.existsByApartmentAndBlock(parkingDto.getApartment(), parkingDto.getBlock())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("conflict:Parking already registered for this apartmant/block");
+
+        }
         var parking = new Parking();
         BeanUtils.copyProperties(parkingDto, parking);
         parking.setRegistrationDate(LocalDateTime.now(ZoneId.of("UTC")));
         return ResponseEntity.status(HttpStatus.CREATED).body(parkingService.save(parking));
     }
 
+    @GetMapping("/todos")
+    public ResponseEntity<List<Parking>> getAllParking() {
+        return ResponseEntity.status(HttpStatus.OK).body(parkingService.findAll());
+    }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getIdParking(@PathVariable(value = "id") UUID id) {
+        Optional<Parking> parkingOptional = parkingService.findById(id);
+        if (!parkingOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Parking not found");
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(parkingOptional.get());
+    }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteParking(@PathVariable(value = "id") UUID id) {
+        Optional<Parking> parkingOptional = parkingService.findById(id);
+        if (!parkingOptional.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("C");
+        }
+        parkingService.delete(parkingOptional.get());
+        return ResponseEntity.status(HttpStatus.OK).body("Successfully");
 
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<Object>updeteParking(@PathVariable(value = "id")UUID id,
+                                               @RequestBody @Valid ParkingDto parkingDto){
+        Optional<Parking>parkingOptional = parkingService.findById(id);
+        if (!parkingOptional.isPresent()){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(("Parking not found"));
+        }
+        var parking = new Parking();
+        return ResponseEntity.status(HttpStatus.OK).body(parkingService.save(parking));
+    }
 }
+
+
+
+
